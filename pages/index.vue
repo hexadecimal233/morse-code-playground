@@ -1,56 +1,141 @@
 <template>
-  <div class="flex flex-col items-center justify-center h-screen">
-    <input
-      v-model="inputText"
-      @input="stopMorseScript()"
-      placeholder="Hello World" />
-    <div>
-      <label>打字速度 (WPM)</label>
-      <input v-model="playWpm" type="range" min="5" max="30" />
-    </div>
-    <div>
-      <label>音高频率 (Frequency)</label>
-      <input v-model="playFreq" type="range" min="50" max="2000" />
-    </div>
-    <div>
-      <label>播出声音前显示文字</label>
-      <input v-model="playShowTextBeforeSound" type="checkbox" />
+  <div
+    class="flex flex-col items-center justify-center bg-blue-50 min-h-screen p-4">
+    <div class="p-8 bg-white max-w-2xl rounded-2xl border-4 border-gray-100">
+      <div
+        class="flex items-center gap-3 text-4xl text-blue-400 font-bold mb-6 pb-4 border-b-2 border-blue-200">
+        <Icon name="mdi:radio-tower" />
+        <h1>Morse Code Playground</h1>
+      </div>
+
+      <div class="space-y-6 text-blue-400">
+        <div>
+          <input
+            v-model="inputText"
+            @input="stopMorseScript()"
+            placeholder="Hello World"
+            class="w-full p-3 rounded-lg border-2 border-blue-200 focus:outline-none focus:border-blue-300 bg-blue-50" />
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-medium">播放速度 (WPM)</label>
+          <input
+            v-model="playWpm"
+            type="range"
+            min="5"
+            max="30"
+            class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" />
+          <div class="text-right text-sm">{{ playWpm }} WPM</div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-medium">音高频率 (Frequency)</label>
+          <input
+            v-model="playFreq"
+            type="range"
+            min="50"
+            max="2000"
+            class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" />
+          <div class="text-right text-sm">{{ playFreq }} Hz</div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-medium">音量大小 (Volume)</label>
+          <input
+            v-model="playVolume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer" />
+          <div class="text-right text-sm">{{ playVolume }}</div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input
+            v-model="playShowTextBeforeSound"
+            type="checkbox"
+            class="w-5 h-5 text-blue-400 rounded border-blue-300 focus:ring-blue-300" />
+          <label>在播放前显示文本</label>
+        </div>
+
+        <!-- TODO: 更新样式 -->
+        <div class="flex flex-row *:m-4 pt-2">
+          <button
+            @click="playMorseScript()"
+            class="w-1/2 bg-blue-400 hover:bg-blue-300 border-blue-300 text-white font-medium shadowed-box">
+            播放
+          </button>
+          <button
+            @click="stopMorseScript()"
+            class="w-1/2 bg-white hover:bg-blue-50 text-blue-400 border-blue-100 font-medium shadowed-box">
+            停止
+          </button>
+        </div>
+      </div>
+
+      <div class="my-8 border-t-2 border-blue-200"></div>
+
+      <div class="mb-6">
+        <div class="flex items-start gap-2">
+          <Icon
+            name="mdi:information"
+            class="text-blue-400 mt-0.5 flex-shrink-0" />
+          <p class="text-blue-500">
+            什么是摩斯电码 (Morse Code)？ 摩斯电码是一种用于通信的编码方式，使用
+            "." 和 "-" 来表示字母和数字。
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="bg-blue-100 min-h-36 rounded-lg flex flex-col border-2 border-blue-200">
+        <div
+          class="p-4 font-mono text-xl flex items-center bg-blue-200 rounded-t-lg">
+          <span class="text-blue-400">{{ typewriterText }}</span>
+          <span class="text-blue-600 font-bold animate-pulse">
+            {{ typewriterTextCurrent }}
+          </span>
+        </div>
+        <div class="p-4 text-center text-blue-500 font-medium">
+          Current Morse:
+          <span class="font-bold">{{ currentCharMorseCode }}</span>
+        </div>
+      </div>
     </div>
 
-    <div @click="playMorseScript()">play</div>
-    <div @click="stopMorseScript()">stop</div>
-
-    <!--
-    <div>
-      什么是摩斯电码 (Morse Code)？ 摩斯电码是一种用于通信的编码方式，使用 "."
-      和 "-" 来表示字母和数字。
-      在部分ARG，恐怖片或解谜类游戏中，经常使用摩斯电码来表示特殊字符和表情符号。
-      同时，摩斯电码也是
+    <div class="mt-8 mb-4 text-center text-blue-400">
+      Made with ❤️ by
+      <a href="https://nichijou.moe/" target="_blank">Hexzii</a>
+      |
+      <a
+        href="https://github.com/hexadecimal233/morse-code-playground"
+        target="_blank">
+        <Icon name="simple-icons:github" class="text-black" />
+        Source Code
+      </a>
     </div>
-     -->
-
-    <div class="animator block text-xl">
-      <p>{{ typewriterText }}</p>
-      <p style="color: red">{{ typewriterTextCurrent }}</p>
-    </div>
-    <div class="current">{{ currentCharMorseCode }}</div>
   </div>
 </template>
 
 <style scoped>
-.animator {
-  font-family: monospace;
+@import "tailwindcss";
+
+.shadowed-box {
+  @apply py-3 px-6 rounded-lg p-4 border-r-8 border-b-8
+  hover:border-r-0 hover:border-b-0 transition-all duration-75;
 }
 </style>
 
 <script setup lang="ts">
 // 字符映射表
-const morseCode: Record<string, string> = { "A": ".-", "B": "-...", "C": "-.-.", "D": "-..", "E": ".", "F": "..-.", "G": "--.", "H": "....", "I": "..", "J": ".---", "K": "-.-", "L": ".-..", "M": "--", "N": "-.", "O": "---", "P": ".--.", "Q": "--.-", "R": ".-.", "S": "...", "T": "-", "U": "..-", "V": "...-", "W": ".--", "X": "-..-", "Y": "-.--", "Z": "--..", "0": "-----", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....", "6": "-....", "7": "--...", "8": "---..", "9": "----.", ".": ".-.-.-", ",": "--..--", "?": "..--..", "'": ".----.", "!": "-.-.--", "/": "-..-.", "(": "-.--.", ")": "-.--.-", "&": ".-...", ":": "---...", ";": "-.-.-.", "=": "-...-", "+": ".-.-.", "-": "-....-", "_": "..--.-", '"': ".-..-.", "$": "...-..-", "@": ".--.-.", " ": " "}; // prettier-ignore
+const morseCode: Record<string, string> = { "A": ".-", "B": "-...", "C": "-.-.", "D": "-..", "E": ".", "F": "..-.", "G": "--.", "H": "....", "I": "..", "J": ".---", "K": "-.-", "L": ".-..", "M": "--", "N": "-.", "O": "---", "P": ".--.", "Q": "--.-", "R": ".-.", "S": "...", "T": "-", "U": "..-", "V": "...-", "W": ".--", "X": "-..-", "Y": "-.--", "Z": "--..", "0": "-----", "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....", "6": "-....", "7": "--...", "8": "---..", "9": "----.", ".": ".-.-.-", ",": "--..--", "?": "..--..", "'": ".----.", "!": "-.-.--", "/": "-..-.", "(": "-.--.", ")": "-.--.-", "&": ".-...", ":": "---...", ";": "-.-.-.", "=": "-...-", "+": ".-.-.", "-": "-....-", "_": "..--.-", '"': ".-..-.", "$": "...-..-", "@": ".--.-.", " ": "/"}; // prettier-ignore
 
 // 配置
 const inputText = ref("Hello World")
 const playWpm = ref(15)
 const playFreq = ref(490)
+const playVolume = ref(0.8)
 const playShowTextBeforeSound = ref(true)
 
 // 状态
@@ -66,11 +151,11 @@ watchEffect(() => {
     currentIdx.value - 1 + (isPlaying.value ? 0 : 1)
   )
 
-  let currentChar =
-    inputText.value[Math.max(currentIdx.value - 1, 0)].toUpperCase()
+  let currentChar = inputText.value[Math.max(currentIdx.value - 1, 0)]
   if (isPlaying.value) {
+    // FIXME: Spaces does not display
     typewriterTextCurrent.value = currentChar
-    currentCharMorseCode.value = morseCode[currentChar]
+    currentCharMorseCode.value = morseCode[currentChar.toUpperCase()]
   } else {
     typewriterTextCurrent.value = ""
     currentCharMorseCode.value = ""
@@ -123,12 +208,16 @@ function playSine(freq: number, duration: number): Promise<boolean> {
     oscillator.frequency.value = freq
 
     // ATK
+    // TODO: Realtime Gain modification
     gainNode.gain.setValueAtTime(0, audioContext.currentTime)
-    gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + attack)
+    gainNode.gain.linearRampToValueAtTime(
+      1 * playVolume.value,
+      audioContext.currentTime + attack
+    )
 
     // SUS + DEC
     gainNode.gain.setValueAtTime(
-      1,
+      1 * playVolume.value,
       audioContext.currentTime + attack + duration - decay
     )
     gainNode.gain.linearRampToValueAtTime(
@@ -159,8 +248,8 @@ async function playMorseChar(char: string) {
   const convertedChar = morseCode[char]
 
   // 单词间隔
-  if (convertedChar === " ") {
-    await new Promise((resolve) => setTimeout(resolve, wordSpace))
+  if (convertedChar === "/") {
+    await new Promise((resolve) => setTimeout(resolve, wordSpace * 1000))
     return
   }
 
@@ -203,4 +292,6 @@ async function playMorseScript() {
 function stopMorseScript() {
   isPlaying.value = false
 }
+
+// TODO: 自定义采样播放
 </script>

@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+* {
+  font-family: Roboto;
+}
+
+a {
+  @apply text-blue-400 transition-all duration-300 font-bold
+  hover:text-blue-500;
+}
+
+
