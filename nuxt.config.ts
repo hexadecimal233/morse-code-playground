@@ -11,18 +11,17 @@ export default defineNuxtConfig({
   app: {
     head: {
       charset: "utf-8",
-      title: "Morse Code Playground",
+      title: "Hexzii's projects page ⭐",
       meta: [
         {
           name: "description",
-          content: "Nuxt 3 App",
+          content: "A collection of my frontend projects.",
         },
       ],
       link: [
         {
           rel: "icon",
           type: "image/png",
-          // TODO: add a favicon
           href: "/favicon.png",
         },
         {
