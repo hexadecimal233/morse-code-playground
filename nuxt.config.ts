@@ -5,10 +5,8 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
-
-  vite: {
-    plugins: [tailwindcss()],
-  },
+  ssr: false,
+  vite: { plugins: [tailwindcss()] },
 
   app: {
     head: {
@@ -35,5 +33,5 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxt/icon"],
+  modules: ["@nuxt/icon", "@nuxt/image"],
 })
