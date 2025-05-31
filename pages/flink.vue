@@ -181,44 +181,36 @@ watch(ghToken, () => {
 })
 
 class UserGraph {
-  nodes: Map<string, string[]> = new Map()
+  nodes: Map<string, Set<string>> = new Map()
 
   // 添加单向关系
   addRelationship(fromUser: string, toUser: string): void {
     if (!this.nodes.has(fromUser)) {
-      this.nodes.set(fromUser, [])
+      this.nodes.set(fromUser, new Set())
     }
-    const relationships = this.nodes.get(fromUser)!
-    if (!relationships.includes(toUser)) {
-      relationships.push(toUser)
-    }
+    this.nodes.get(fromUser)!.add(toUser)
   }
 
   clear(): void {
     this.nodes.clear()
   }
 
-  // 检查两个用户是否有双向关系
-  hasMutualRelationship(user1: string, user2: string): boolean {
-    const user1Follows = this.nodes.get(user1) || []
-    const user2Follows = this.nodes.get(user2) || []
-
-    return user1Follows.includes(user2) && user2Follows.includes(user1)
-  }
-
   // 获取双向关系
   getMutualLinks(): [string, string][] {
     const pairs: [string, string][] = []
-
     const users = Array.from(this.nodes.keys())
 
     for (let i = 0; i < users.length; i++) {
-      for (let j = i + 1; j < users.length; j++) {
-        const userA = users[i]
-        const userB = users[j]
+      const userA = users[i]
+      const userAFollows = this.nodes.get(userA)!
 
-        if (this.hasMutualRelationship(userA, userB)) {
-          pairs.push([userA, userB])
+      for (const userB of userAFollows) {
+        // 只处理字母序在后的用户，避免重复
+        if (userB > userA) {
+          const userBFollows = this.nodes.get(userB)
+          if (userBFollows?.has(userA)) {
+            pairs.push([userA, userB])
+          }
         }
       }
     }
@@ -246,10 +238,10 @@ async function getFollowings(
   const cachedFollowings = userCache.get(username)
   if (cachedFollowings) {
     if (cachedFollowings.length === 0) {
-      console.debug(`${username} has no following users, skipping.`)
+      console.log(`${username} has no following users, skipping.`)
       return []
     }
-    console.debug(
+    console.log(
       `Get ${username}'s followings from cache: ${cachedFollowings.length}`
     )
     return cachedFollowings
@@ -272,7 +264,7 @@ async function getFollowings(
       userData.following === 0 ||
       (userData.following >= maxFollowing.value && !ignoreLimit)
     ) {
-      console.debug(
+      console.log(
         `${username} has ${
           userData.following >= maxFollowing.value ? "too many" : "no"
         } following users, skipping.`
@@ -302,13 +294,9 @@ async function getFollowings(
             return user.login
           })
       )
-      console.debug(`Getting ${username}'s followings: ${i}/${pagesMax} pages`)
+      console.log(`Getting ${username}'s followings: ${i}/${pagesMax} pages`)
     }
     userCache.set(username, followings)
-
-    console.debug(
-      `Get ${username}'s followings: ${userData.following} followings`
-    )
 
     return followings
   } catch (error: any) {
@@ -326,7 +314,7 @@ async function main() {
   userGraph.clear()
   try {
     const mainFollowings = await getFollowings(mainUser.value, true)
-    userGraph.nodes.set(mainUser.value, mainFollowings)
+    userGraph.nodes.set(mainUser.value, new Set(mainFollowings))
 
     for (let i = 0; i < mainFollowings.length; i++) {
       progressText.value[0] = `第 ${i + 1} / ${mainFollowings.length} 个用户`
@@ -337,7 +325,7 @@ async function main() {
       const user = mainFollowings[i]
       const followings = await getFollowings(user)
       if (followings.length > 0) {
-        userGraph.nodes.set(user, followings)
+        userGraph.nodes.set(user, new Set(followings))
       }
     }
   } catch (error: any) {
